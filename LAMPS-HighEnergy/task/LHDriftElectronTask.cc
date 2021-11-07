@@ -4,6 +4,7 @@
 #include "KBMCStep.hh"
 
 #include "TCanvas.h"
+#include "TObjString.h"
 #include "TRandom.h"
 #include "TMath.h"
 

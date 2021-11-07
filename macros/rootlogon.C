@@ -7,6 +7,7 @@
   TString osString = info.fOS;
 
   TString libString;
+  libString = TString(gSystem -> Getenv("KEBIPATH")) + "/build/libKEBI.dylib";
   if (osString.Index("Darwin") >= 0)
     libString = TString(gSystem -> Getenv("KEBIPATH")) + "/build/libKEBI.dylib";
   else if (osString.Index("Linux") >= 0)
