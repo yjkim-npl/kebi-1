@@ -10,7 +10,7 @@
 #include "KBSteppingAction.hh"
 #include "KBTrackingAction.hh"
 
-#include "TB22HDetectorConstruction.hh"
+#include "TB22KDetectorConstruction.hh"
 
 int main(int argc, char** argv)
 {
@@ -19,7 +19,7 @@ int main(int argc, char** argv)
 	else if (argc == 3) physListStr = argv[2];
 	else
 	{
-		cout <<"Usage: ./run_Tb22Hmc.g4sim blah.conf G4PhysList\n";
+		cout <<"Usage: ./run_Tb22Kmc.g4sim blah.conf G4PhysList\n";
 		assert(false);
 	}
 
@@ -30,7 +30,7 @@ int main(int argc, char** argv)
 	auto runManager = new KBG4RunManager();
 	runManager->SetParameterContainer(argv[1]);
 	runManager->SetUserInitialization(physList);
-	runManager->SetUserInitialization(new TB22HDetectorConstruction());
+	runManager->SetUserInitialization(new TB22KDetectorConstruction());
 	runManager->Initialize();
 	runManager->Run(argc, argv);
 	delete runManager;

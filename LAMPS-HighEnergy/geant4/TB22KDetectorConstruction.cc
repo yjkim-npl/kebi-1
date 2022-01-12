@@ -1,4 +1,4 @@
-#include "TB22HDetectorConstruction.hh"
+#include "TB22KDetectorConstruction.hh"
 
 #include "KBG4RunManager.hh"
 #include "KBGeoBoxStack.hh"
@@ -25,19 +25,19 @@
 using namespace std;
 
 //Constructor
-TB22HDetectorConstruction::TB22HDetectorConstruction() : G4VUserDetectorConstruction()
+TB22KDetectorConstruction::TB22KDetectorConstruction() : G4VUserDetectorConstruction()
 {
 	fNist = G4NistManager::Instance();
 }
 
 //Destructor
-TB22HDetectorConstruction::~TB22HDetectorConstruction()
+TB22KDetectorConstruction::~TB22KDetectorConstruction()
 {
 	G4AutoDelete::Register(fNist);
 }
 
 //=======================================================
-G4VPhysicalVolume* TB22HDetectorConstruction::Construct()
+G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 {
 	auto fRun = (KBG4RunManager*)G4RunManager::GetRunManager();
 	auto fPar = fRun->GetParameterContainer();
