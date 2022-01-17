@@ -2,6 +2,7 @@
 #include "TSystem.h"
 #include "TDirectory.h"
 #include "TApplication.h"
+#include "TObjString.h"
 #include "KBParameterContainer.hh"
 #include <iostream>
 #include <fstream>

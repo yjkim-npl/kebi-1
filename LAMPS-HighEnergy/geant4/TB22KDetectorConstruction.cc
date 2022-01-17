@@ -65,6 +65,7 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 	G4Material* CH4Gas = new G4Material("CH4Gas", CH4GasD, 2, kStateGas, fLabTemp);
 	G4Element* elH = new G4Element("Hydrogen", "H", 1., 1.00794 * g/mole);
 	G4Element* elC = new G4Element("Carbon", "C", 6., 12.011 * g/mole);
+	G4Element* elO = new G4Element("Oxygen", "O", 8., 16.000 * g/mole);
 	CH4Gas->AddElement(elC, 1);
 	CH4Gas->AddElement(elH, 4);
 
@@ -97,6 +98,72 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 	fVisWorld->SetForceWireframe(true);
 	WorldLog->SetVisAttributes(fVisWorld);
 
+	//Acrylic Collimator
+	//-------------------------------------------------------------------
+	if (fPar->GetParBool("CollimatorIn"))
+	{
+		G4Material* Collmat = new G4Material("Acrylic",1.19*g/cm3,3,kStateSolid, 293.15*kelvin);
+		Collmat -> AddElement(elC,5);
+		Collmat -> AddElement(elH,8);
+		Collmat -> AddElement(elO,2);
+
+		G4int	 CollID	   = fPar->GetParInt("CollID");
+		G4double CollDimX  = fPar->GetParDouble("CollDimX");	// one brick [] 
+		G4double CollDimY  = fPar->GetParDouble("CollDimY"); 
+		G4double CollDimZ  = fPar->GetParDouble("CollDimZ"); 
+		G4double CollslitX = fPar->GetParDouble("CollslitX"); 
+		G4double CollslitY = fPar->GetParDouble("CollslitY"); 
+		G4double CollPosZ  = fPar->GetParDouble("CollPosZ"); 
+
+		G4Box* solidBoxColl = new G4Box("solidBoxColl",CollDimX/2.,CollDimY/2.,CollDimZ/2.);
+		G4Box* solidSubColl = new G4Box("solidSubColl",CollslitX/2.,CollDimY/2.,1.03*CollDimZ/2.);
+		G4SubtractionSolid* solidColl = new G4SubtractionSolid("solidColl",solidBoxColl,solidSubColl,0,G4ThreeVector(0,0,0));
+		G4LogicalVolume* logicColl = new G4LogicalVolume(solidColl, Collmat, "logicCollimator");
+
+		//vis attributes
+		G4VisAttributes* attColl = new G4VisAttributes(G4Colour(G4Colour::Gray()));
+		attColl -> SetVisibility(true);
+		attColl -> SetForceWireframe(true);
+		logicColl -> SetVisAttributes(attColl);
+		G4RotationMatrix* Rot = new G4RotationMatrix;
+		Rot -> rotateZ(90*deg);
+		// front block set (up, down)
+		new G4PVPlacement(Rot, G4ThreeVector(0,0,CollPosZ+CollDimZ/2.), logicColl,"Collimator_1", WorldLog, false, fPar->GetParInt("CollID"), true);
+		// back block set (left, right)
+		new G4PVPlacement(0, G4ThreeVector(0,0,CollPosZ+3*CollDimZ/2.), logicColl,"Collimator_1", WorldLog, false, fPar->GetParInt("CollID"), true);
+
+	}
+
+	//Boron Shield
+	//--------------------------------------------------------------------
+	if(fPar -> GetParBool("ShieldIn"))
+	{
+		G4Material* elB = fNist->FindOrBuildMaterial("G4_B");
+		G4Material* matCH2 = fNist->FindOrBuildMaterial("G4_POLYETHYLENE");
+		G4double density = 0.3*elB->GetDensity() + 0.7*matCH2->GetDensity();
+		G4Material* Shieldmat = new G4Material("BoratedPolyethylene",density,2);
+		Shieldmat -> AddMaterial(elB,0.3);
+		Shieldmat -> AddMaterial(matCH2,0.7);
+
+		G4double ShieldDimX  = fPar -> GetParDouble("ShieldDimX");
+		G4double ShieldDimY  = fPar -> GetParDouble("ShieldDimY");
+		G4double ShieldDimZ  = fPar -> GetParDouble("ShieldDimZ");
+		G4double ShieldHoleX = fPar -> GetParDouble("ShieldHoleX");
+		G4double ShieldHoleY = fPar -> GetParDouble("ShieldHoleY");
+		G4double ShieldPosZ  = fPar -> GetParDouble("ShieldPosZ");
+
+		G4Box* solidBoxShield = new G4Box("solidBoxShield", ShieldDimX/2.,ShieldDimY/2.,ShieldDimZ/2.);
+		G4Box* solidSubShield = new G4Box("solidSubShield",ShieldHoleX/2.,ShieldHoleY/2.,ShieldDimZ/2.*1.03);
+		G4SubtractionSolid* solidShield = new G4SubtractionSolid("solidShield",solidBoxShield,solidSubShield,0,G4ThreeVector(0,0,0));
+		G4LogicalVolume* logicShield = new G4LogicalVolume(solidShield, Shieldmat, "logicShield");
+		//vis attributes
+		G4VisAttributes* attShield = new G4VisAttributes(G4Colour(G4Colour::Brown()));
+		attShield -> SetVisibility(true);
+		attShield -> SetForceWireframe(true);
+		logicShield -> SetVisAttributes(attShield);
+
+		new G4PVPlacement(0,G4ThreeVector(0,0,ShieldPosZ+ShieldDimZ/2.),logicShield,"Shield",WorldLog,false,fPar->GetParInt("ShieldID"),true);
+	}
 	//SC
 	//--------------------------------------------------------------------
 
