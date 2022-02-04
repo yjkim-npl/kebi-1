@@ -9,6 +9,7 @@
 #include "G4strstreambuf.hh"
 
 #include "TSystem.h"
+#include "TObjString.h"
 
 #include "KBG4RunMessenger.hh"
 #include "KBPrimaryGeneratorAction.hh"
