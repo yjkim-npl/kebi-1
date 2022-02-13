@@ -2,9 +2,12 @@
 /vis/drawVolume
 
 # Visualization filter
-/vis/filtering/trajectories/create/particleFilter
-/vis/filtering/trajectories/particleFilter-0/add e-
-/vis/filtering/trajectories/particleFilter-0/invert true # invert = mask out
+/vis/filtering/trajectories/create/attributeFilter
+/vis/filtering/trajectories/attributeFilter-0/setAttribute IMag
+/vis/filtering/trajectories/attributeFilter-0/addInterval 10 keV 100 GeV
+#/vis/filtering/trajectories/create/particleFilter
+#/vis/filtering/trajectories/particleFilter-0/add e-
+#/vis/filtering/trajectories/particleFilter-0/invert true # invert = mask out
 
 #/vis/scene/add/axes 0 0 0 500 mm
 /vis/scene/add/eventID
@@ -14,9 +17,17 @@
 /vis/geometry/set/visibility World 0 false
 #/vis/geometry/set/colour YOURDETECTOR 1 0.8 0.8 1 0.3
 
-/vis/modeling/trajectories/create/drawByCharge
-/vis/modeling/trajectories/drawByCharge-0/default/setDrawStepPts true
-/vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 2
+#/vis/modeling/trajectories/create/drawByCharge
+/vis/modeling/trajectories/create/drawByParticleID
+#/vis/modeling/trajectories/drawByCharge-0/default/setDrawStepPts true
+#/vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 2
+/vis/modeling/trajectories/drawbyParticleID-0/set e+ steelblue
+/vis/modeling/trajectories/drawbyParticleID-0/set e- steelblue
+/vis/modeling/trajectories/drawbyParticleID-0/set neutron lightgrey 
+/vis/modeling/trajectories/drawbyParticleID-0/set proton+ orange
+/vis/modeling/trajectories/drawbyParticleID-0/set proton- orange
+/vis/modeling/trajectories/drawbyParticleID-0/set opticalphoton cyan
+/vis/modeling/trajectories/drawbyParticleID-0/set gamma wheat
 
 /vis/ogl/set/transparency true
 /vis/set/colour
