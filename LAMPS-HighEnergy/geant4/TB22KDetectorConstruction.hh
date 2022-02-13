@@ -1,6 +1,7 @@
 #ifndef TB22KDETECTORCONSTRUCTION_HH
 #define TB22KDETECTORCONSTRUCTION_HH
 
+#include "TB22KMaterials.hh"
 #include "G4VUserDetectorConstruction.hh"
 #include "globals.hh"
 
@@ -19,7 +20,9 @@ class TB22KDetectorConstruction : public G4VUserDetectorConstruction
 		virtual G4VPhysicalVolume* Construct();
 
 	private:
-
-		G4NistManager* fNist;
+		void DefineMaterials();
+		TB22KMaterials* fMaterials;
+		G4Material* FindMaterial(G4String matName) {return fMaterials -> GetMaterial(matName);}
+//		G4NistManager* fNist;
 };
 #endif
