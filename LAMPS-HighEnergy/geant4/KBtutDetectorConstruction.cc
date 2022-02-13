@@ -28,6 +28,7 @@ using namespace std;
 KBtutDetectorConstruction::KBtutDetectorConstruction() : G4VUserDetectorConstruction()
 {
 	fMaterials = KBtutMaterials::GetInstance();
+//	DefineMaterials();
 }
 
 //Destructor
@@ -44,6 +45,7 @@ void KBtutDetectorConstruction::DefineMaterials()
 //=======================================================
 G4VPhysicalVolume* KBtutDetectorConstruction::Construct()
 {
+
 	auto fRun = (KBG4RunManager*)G4RunManager::GetRunManager();
 	auto fPar = fRun->GetParameterContainer();
 
@@ -69,13 +71,17 @@ G4VPhysicalVolume* KBtutDetectorConstruction::Construct()
 	G4double worldDZ = fPar->GetParDouble("worlddZ");
 
 	G4Box*             WorldSol = new G4Box("WorldSolid", worldDX, worldDY, worldDZ);
-	G4LogicalVolume*   WorldLog = new G4LogicalVolume(WorldSol, FindMaterial("G4_Galactic"), "World");
+	G4LogicalVolume*   WorldLog = new G4LogicalVolume(WorldSol, FindMaterial("G4_AIR"), "World");
 	G4VPhysicalVolume* WorldPhy = new G4PVPlacement(0, fZero, WorldLog, "WorldPhys", 0, false, worldID, true);
 
 	auto fVisWorld = new G4VisAttributes();
 	fVisWorld->SetColor(G4Color::White());
 	fVisWorld->SetForceWireframe(true);
 	WorldLog->SetVisAttributes(fVisWorld);
+
+
+//	G4NistManager* nist = G4NistManager::Instance();
+//	nist -> FindOrBuildMaterial("G4_B");
 
 	// Polystyrene BoX
 	//--------------------------------------------------------------------
@@ -90,7 +96,9 @@ G4VPhysicalVolume* KBtutDetectorConstruction::Construct()
 
 		// three steps to construct detector (solidVolume -> logicalVolume -> PhysicalVolume)
 		G4Box*           solBox = new G4Box("SolidBox", BoxDimX/2, BoxDimY/2, BoxDimZ/2);
-		G4LogicalVolume* logBox = new G4LogicalVolume(solBox, FindMaterial("Polystyrene"), "logicBox");
+//		G4LogicalVolume* logBox = new G4LogicalVolume(solBox, FindMaterial("G4_Pb"), "logicBox");
+		G4LogicalVolume* logBox = new G4LogicalVolume(solBox, FindMaterial("G4_PLASTIC_SC_VINYLTOLUENE"), "logicBox");
+//		G4LogicalVolume* logBox = new G4LogicalVolume(solBox, nist -> FindOrBuildMaterial("G4_Pb"), "logicBox");
 
 		G4ThreeVector BoxPos(0, 0, BoxPosZOff + BoxDimZ/2.); // starting point set at BoxPosZOff
 		G4VPhysicalVolume* phyBox = new G4PVPlacement(0, BoxPos, logBox, "physicalBox", WorldLog, false, BoxID, true);

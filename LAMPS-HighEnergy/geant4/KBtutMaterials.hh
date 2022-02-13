@@ -19,7 +19,9 @@ class KBtutMaterials{
 		G4Material* fVac;
 		G4Material* fAir;
 		G4Material* fPS;
-//		G4Material* fUser;
+		G4Material* fB;
+		G4Material* fPb;
+		G4Material* fUser;
 };
 
 #endif

@@ -37,6 +37,9 @@ G4Material* KBtutMaterials::GetMaterial(const G4String matName){
 void KBtutMaterials::CreateMaterials(){
 	fNistMan -> FindOrBuildMaterial("G4_Galactic");
 	fNistMan -> FindOrBuildMaterial("G4_AIR");
+	fNistMan -> FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");
+	fNistMan -> FindOrBuildMaterial("G4_B");
+	fNistMan -> FindOrBuildMaterial("G4_Pb");
 
 	G4String symbol;
 	G4double a, z, density;
@@ -47,11 +50,14 @@ void KBtutMaterials::CreateMaterials(){
 	G4Element* O = new G4Element("Oxygen"	,symbol="O"	, z=8., a=16.00*g/mole);
 	fVac = G4Material::GetMaterial("G4_Galactic");
 	fAir = G4Material::GetMaterial("G4_AIR");
+
 	fPS = new G4Material("Polystyrene", density=1.05*g/cm3, ncomp=2);
 	fPS -> AddElement(C, natoms=8);
 	fPS -> AddElement(H, natoms=8);
 
-//	fUser = new G4Material();
+	fB = G4Material::GetMaterial("G4_B");
+	fPb = G4Material::GetMaterial("G4_Pb");
+	fUser = G4Material::GetMaterial("G4_PLASTIC_SC_VINYLTOLUENE");
 //	fUser -> AddElement();
 }
 //KBtutMaterials
