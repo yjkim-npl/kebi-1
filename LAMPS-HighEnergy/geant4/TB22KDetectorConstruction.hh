@@ -21,8 +21,8 @@ class TB22KDetectorConstruction : public G4VUserDetectorConstruction
 
 	private:
 		void DefineMaterials();
-		TB22KMaterials* fMaterials;
-		G4Material* FindMaterial(G4String matName) {return fMaterials -> GetMaterial(matName);}
-//		G4NistManager* fNist;
+//		TB22KMaterials* fMaterials;
+//		G4Material* FindMaterial(G4String matName) {return fMaterials -> GetMaterial(matName);}
+		G4NistManager* fNist;
 };
 #endif

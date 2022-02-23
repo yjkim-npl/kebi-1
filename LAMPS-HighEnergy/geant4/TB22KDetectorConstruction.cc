@@ -28,18 +28,19 @@ using namespace std;
 TB22KDetectorConstruction::TB22KDetectorConstruction() : G4VUserDetectorConstruction()
 {
 //	fMaterials = TB22KMaterials::GetInstance();
-	DefineMaterials();
+//	DefineMaterials();
+	fNist = G4NistManager::Instance();
 }
 
 //Destructor
 TB22KDetectorConstruction::~TB22KDetectorConstruction()
 {
-//	G4AutoDelete::Register(fNist);
+	G4AutoDelete::Register(fNist);
 }
 
 void TB22KDetectorConstruction::DefineMaterials()
 {
-	fMaterials = TB22KMaterials::GetInstance();
+//	fMaterials = TB22KMaterials::GetInstance();
 }
 
 //=======================================================
@@ -62,31 +63,33 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 	G4RotationMatrix rotTheta0 = G4RotationMatrix(); rotTheta0.rotateY(comTheta0 * deg);
 	G4RotationMatrix rotTheta1 = G4RotationMatrix(); rotTheta1.rotateY(comTheta1 * deg);
 
-//	//Argon (gas)
-//	G4double ArGasD = 1.7836 * mg/cm3 * fSTPTemp/fLabTemp;
-//	G4Material* ArGas = new G4Material("ArGas", 18, 39.948*g/mole, ArGasD, kStateGas, fLabTemp);
-//
-//	//CH4 (Methane)
-//	G4double CH4GasD = 0.717e-3 * g/cm3 * fSTPTemp/fLabTemp; //Methane density
-//	G4Material* CH4Gas = new G4Material("CH4Gas", CH4GasD, 2, kStateGas, fLabTemp);
-//	G4Element* elH = new G4Element("Hydrogen", "H", 1., 1.00794 * g/mole);
-//	G4Element* elC = new G4Element("Carbon", "C", 6., 12.011 * g/mole);
-//	G4Element* elO = new G4Element("Oxygen", "O", 8., 16.000 * g/mole);
-//	CH4Gas->AddElement(elC, 1);
-//	CH4Gas->AddElement(elH, 4);
-//
-//	//P10
-//	G4double P10GasD = 0.9*ArGasD + 0.1*CH4GasD;
-//	G4Material* P10Gas = new G4Material("P10Gas", P10GasD, 2, kStateGas, fLabTemp);
-//	P10Gas->AddMaterial(ArGas, 0.9 * ArGasD/P10GasD);
-//	P10Gas->AddMaterial(CH4Gas, 0.1 * CH4GasD/P10GasD);
+	//Argon (gas)
+	G4double ArGasD = 1.7836 * mg/cm3 * fSTPTemp/fLabTemp;
+	G4Material* ArGas = new G4Material("ArGas", 18, 39.948*g/mole, ArGasD, kStateGas, fLabTemp);
+
+	//CH4 (Methane)
+	G4double CH4GasD = 0.717e-3 * g/cm3 * fSTPTemp/fLabTemp; //Methane density
+	G4Material* CH4Gas = new G4Material("CH4Gas", CH4GasD, 2, kStateGas, fLabTemp);
+	G4Element* elH = new G4Element("Hydrogen", "H", 1., 1.00794 * g/mole);
+	G4Element* elC = new G4Element("Carbon", "C", 6., 12.011 * g/mole);
+	G4Element* elO = new G4Element("Oxygen", "O", 8., 16.000 * g/mole);
+	CH4Gas->AddElement(elC, 1);
+	CH4Gas->AddElement(elH, 4);
+
+	//P10
+	G4double P10GasD = 0.9*ArGasD + 0.1*CH4GasD;
+	G4Material* P10Gas = new G4Material("P10Gas", P10GasD, 2, kStateGas, fLabTemp);
+	P10Gas->AddMaterial(ArGas, 0.9 * ArGasD/P10GasD);
+	P10Gas->AddMaterial(CH4Gas, 0.1 * CH4GasD/P10GasD);
 
 	//World volume
 	//--------------------------------------------------------------------
 
 	G4Material* worldMat;
-	if      (fPar->GetParInt("worldOpt") == 0) worldMat = FindMaterial("G4_Galactic");
-	else if (fPar->GetParInt("worldOpt") == 1) worldMat = FindMaterial("G4_AIR");
+	if      (fPar->GetParInt("worldOpt") == 0) worldMat = fNist->FindOrBuildMaterial("G4_Galactic");
+	else if (fPar->GetParInt("worldOpt") == 1) worldMat = fNist->FindOrBuildMaterial("G4_AIR");
+//	if      (fPar->GetParInt("worldOpt") == 0) worldMat = FindMaterial("G4_Galactic");
+//	else if (fPar->GetParInt("worldOpt") == 1) worldMat = FindMaterial("G4_AIR");
 	else { cout <<"\nWorld material???\n"; assert(false); return nullptr;}
 
 	G4int    worldID = fPar->GetParInt("worldID");
@@ -103,11 +106,21 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 	fVisWorld->SetForceWireframe(true);
 	WorldLog->SetVisAttributes(fVisWorld);
 
+	// trash
+	//-------------------------------------------------------------------
+	G4Box* solid_T = new G4Box("solid_T",1.,1.,1.);
+	G4LogicalVolume* logic_T = new G4LogicalVolume(solid_T,fNist->FindOrBuildMaterial("G4_Galactic"),"logic_T");
+	G4VPhysicalVolume* physic_T = new G4PVPlacement(0,G4ThreeVector(1000,1000,0),logic_T,"physic_T",WorldLog,false,1,true);
+	fRun -> SetSensitiveDetector(physic_T);
 	//Acrylic Shield
 	//-------------------------------------------------------------------
 	if (fPar -> GetParBool("AcrylShieldIn"))
 	{
-		G4Material* ArcShieldmat = FindMaterial("Acrylic");
+//		G4Material* ArcShieldmat = FindMaterial("Acrylic");
+		G4Material* ArcShieldmat = new G4Material("Acrylic", 1.19*g/cm3, 3, kStateSolid);
+		ArcShieldmat -> AddElement(elC,5);
+		ArcShieldmat -> AddElement(elH,8);
+		ArcShieldmat -> AddElement(elO,2);
 		G4int	 ArcShieldID 	 = fPar->GetParInt("ArcShieldID");
 		G4double ArcShieldDimX	 = fPar->GetParDouble("ArcShieldDimX");
 		G4double ArcShieldDimY	 = fPar->GetParDouble("ArcShieldDimY");
@@ -131,8 +144,11 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 	//-------------------------------------------------------------------
 	if (fPar->GetParBool("CollimatorIn"))
 	{
-//		G4Material* Collmat = new G4Material("Acrylic",1.19*g/cm3,3,kStateSolid, 293.15*kelvin);
-		G4Material* Collmat = FindMaterial("Acrylic");
+//		G4Material* Collmat = FindMaterial("Acrylic");
+		G4Material* Collmat = new G4Material("Acrylic",1.19*g/cm3,3,kStateSolid, 293.15*kelvin);
+		Collmat -> AddElement(elC,5);
+		Collmat -> AddElement(elH,8);
+		Collmat -> AddElement(elO,2);
 
 		G4int	 CollID	   = fPar->GetParInt("CollID");
 		G4double CollDimX  = fPar->GetParDouble("CollDimX");	// one brick [] 
@@ -165,14 +181,14 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 	//--------------------------------------------------------------------
 	if(fPar -> GetParBool("ShieldIn"))
 	{
-//		G4Material* elB = fNist->FindOrBuildMaterial("G4_B");
-//		G4Material* matCH2 = fNist->FindOrBuildMaterial("G4_POLYETHYLENE");
-//		G4double density = 0.3*elB->GetDensity() + 0.7*matCH2->GetDensity();
-//		G4Material* Shieldmat = new G4Material("BoratedPolyethylene",density,2);
-//		Shieldmat -> AddMaterial(elB,0.3);
-//		Shieldmat -> AddMaterial(matCH2,0.7);
+		G4Material* elB = fNist->FindOrBuildMaterial("G4_B");
+		G4Material* matCH2 = fNist->FindOrBuildMaterial("G4_POLYETHYLENE");
+		G4double density = 0.3*elB->GetDensity() + 0.7*matCH2->GetDensity();
+		G4Material* Shieldmat = new G4Material("BoratedPolyethylene",density,2);
+		Shieldmat -> AddMaterial(elB,0.3);
+		Shieldmat -> AddMaterial(matCH2,0.7);
 
-		G4Material* Shieldmat = FindMaterial("BoratedPolyethylene");
+//		G4Material* Shieldmat = FindMaterial("BoratedPolyethylene");
 		G4double ShieldDimX  = fPar -> GetParDouble("ShieldDimX");
 		G4double ShieldDimY  = fPar -> GetParDouble("ShieldDimY");
 		G4double ShieldDimZ  = fPar -> GetParDouble("ShieldDimZ");
@@ -197,8 +213,8 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 
 	if (fPar->GetParBool("SCIn"))
 	{
-//		G4Material* scMat = fNist->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");
-		G4Material* scMat = FindMaterial("G4_PLASTIC_SC_VINYLTOLUENE");
+		G4Material* scMat = fNist->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");
+//		G4Material* scMat = FindMaterial("G4_PLASTIC_SC_VINYLTOLUENE");
 
 		G4int    scID    = fPar->GetParInt("scID");
 		G4double scDimX  = fPar->GetParDouble("scDimX");
@@ -229,10 +245,10 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 	if (fPar->GetParBool("BDCIn"))
 	{
 		//Mylar and Al oxide
-//		G4Material* Mylar   = fNist->FindOrBuildMaterial("G4_MYLAR");
-		G4Material* Mylar 	= FindMaterial("G4_MYLAR");
-//		G4Material* AlOxide = fNist->FindOrBuildMaterial("G4_ALUMINUM_OXIDE");
-		G4Material* AlOxide = FindMaterial("G4_ALUMINUM_OXIDE");
+		G4Material* Mylar   = fNist->FindOrBuildMaterial("G4_MYLAR");
+//		G4Material* Mylar 	= FindMaterial("G4_MYLAR");
+		G4Material* AlOxide = fNist->FindOrBuildMaterial("G4_ALUMINUM_OXIDE");
+//		G4Material* AlOxide = FindMaterial("G4_ALUMINUM_OXIDE");
 
 		//+++++++++++++++++++++++++++++++++++++++
 
@@ -249,12 +265,12 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 
 		//Enclosure volume (all)
 		G4Box*           BDCSol = new G4Box("BDCSolid", (bdcDimX+20)/2, (bdcDimY+20)/2, (bdcDimZ+bdcMylarT)/2);
-		G4LogicalVolume* BDCLog = new G4LogicalVolume(BDCSol, FindMaterial("G4_AIR"), "BDCLogic");
+		G4LogicalVolume* BDCLog = new G4LogicalVolume(BDCSol, fNist->FindOrBuildMaterial("G4_AIR"), "BDCLogic");
 		BDCLog->SetVisAttributes(G4VisAttributes::GetInvisible());
 
 		//p10
 		G4Box*           BDCSolP10 = new G4Box("BDCSolidP10", bdcDimX/2, bdcDimY/2, bdcDimZ/2);
-		G4LogicalVolume* BDCLogP10 = new G4LogicalVolume(BDCSolP10, FindMaterial("p10Gas"), "BDCLogicP10");
+		G4LogicalVolume* BDCLogP10 = new G4LogicalVolume(BDCSolP10, P10Gas, "BDCLogicP10");
 		new G4PVPlacement(0, fZero, BDCLogP10, "BDCP10", BDCLog, false, bdcID + 10, false);
 
 		auto fVisBDC = new G4VisAttributes();
@@ -299,22 +315,27 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 	{
 		G4Material* targetMat = nullptr;;
 
-		if      (fPar->GetParInt("targetMat") == 0) targetMat = FindMaterial("G4_POLYETHYLENE");
+		if      (fPar->GetParInt("targetMat") == 0)
+		{
+//			targetMat = FindMaterial("G4_POLYETHYLENE");;
+			targetMat = fNist->FindOrBuildMaterial("G4_POLYETHYLENE");;
+		}
 		else if (fPar->GetParInt("targetMat") == 1)
 		{
 			//Liquid hydrogen (H2)
-//			G4Material* HLiquid = new G4Material("HLiquid", 1, 1.008*g/mole, 70.85*mg/cm3);
-			targetMat = FindMaterial("HLiquid");
+			G4Material* HLiquid = new G4Material("HLiquid", 1, 1.008*g/mole, 70.85*mg/cm3);
+//			targetMat = FindMaterial("HLiquid");
 		}
 		else if (fPar->GetParInt("targetMat") == 2)
 		{
 			//Solid hydrogen: Nuclear Physics A 805 (2008)
-//			G4Material* HSolid = new G4Material("HSolid", 1, 1.008*g/mole, 44.0*mg/cm3);
-			targetMat = FindMaterial("HSolid");
+			G4Material* HSolid = new G4Material("HSolid", 1, 1.008*g/mole, 44.0*mg/cm3);
+//			targetMat = FindMaterial("HSolid");
 		}
 		else if (fPar->GetParInt("targetMat") == 3) // graphite will be added soon
 		{
-			targetMat = FindMaterial("Graphite");
+//			targetMat = FindMaterial("Graphite");
+			targetMat = new G4Material("Graphite",12,12.011*g/mole,2.26*g/cm3,kStateSolid);
 		}
 		else { cout <<"\nTarget material???\n"; assert(false); }
 
@@ -340,7 +361,8 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 
 	if (fPar->GetParBool("SCTiltIn"))
 	{
-		G4Material* scMat = FindMaterial("G4_PLASTIC_SC_VINYLTOLUENE");
+//		G4Material* scMat = FindMaterial("G4_PLASTIC_SC_VINYLTOLUENE");
+		G4Material* scMat = fNist->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");
 
 		G4int    sctID    = fPar->GetParInt("sctID");
 		G4double sctDimX  = fPar->GetParDouble("sctDimX");
@@ -410,7 +432,7 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 		G4double attpcPosZ1 = fPar->GetParDouble("attpcPosZ1");
 
 		G4Box*           ATPSol = new G4Box("ATTPCSolid", attpcDimX/2, attpcDimY/2, attpcDimZ/2);
-		G4LogicalVolume* ATPLog = new G4LogicalVolume(ATPSol, FindMaterial("p10Gas"), "ATTPCLogic");
+		G4LogicalVolume* ATPLog = new G4LogicalVolume(ATPSol, P10Gas, "ATTPCLogic");
 
 		const double ATPOfsX0 = sin(comTheta0 * deg) * (attpcPosZ0 + attpcDimZ/2.);
 		const double ATPOfsZ0 = cos(comTheta0 * deg) * (attpcPosZ0 + attpcDimZ/2.);
@@ -447,7 +469,8 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 
 	if (fPar->GetParBool("BTOFIn") || fPar->GetParBool("FTOFIn"))
 	{
-		G4Material* tofMat = FindMaterial("G4_PLASTIC_SC_VINYLTOLUENE");
+//		G4Material* tofMat = FindMaterial("G4_PLASTIC_SC_VINYLTOLUENE");
+		G4Material* tofMat = fNist->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");
 
 		G4double tofSlatL_b = fPar->GetParDouble("tofSlatL_b");
 		G4double tofSlatL_f = fPar->GetParDouble("tofSlatL_f");
@@ -520,7 +543,8 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 
 	if (fPar->GetParBool("NDIn"))
 	{
-		G4Material* ndMat = FindMaterial("G4_PLASTIC_SC_VINYLTOLUENE");
+//		G4Material* ndMat = FindMaterial("G4_PLASTIC_SC_VINYLTOLUENE");
+		G4Material* ndMat = fNist->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");
 
 		G4int    ndID    = fPar->GetParInt("ndID");
 		G4int    ndSlatN = fPar->GetParInt("ndSlatN"); //# of pairs: i.e., 1 means two slats
