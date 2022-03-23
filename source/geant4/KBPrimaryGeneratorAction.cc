@@ -130,7 +130,12 @@ void KBPrimaryGeneratorAction::GeneratePrimariesMode0(G4Event* anEvent)
 			vx = RDdistX(RDGen); //(G4UniformRand()-0.5) * beamdx;
 			vy = RDdistY(RDGen); //(G4UniformRand()-0.5) * beamdy;
 		}
-
+		if(par -> GetParBool("G4InputTimeDist"))
+		{
+			std::uniform_real_distribution<> RDdistT(0,1);
+			const double vt = RDdistT(RDGen);
+			fParticleGun -> SetParticleTime(vt * ms);
+		}
 		fParticleGun -> SetParticlePosition(G4ThreeVector(vx,vy,vz));
 		fParticleGun->GeneratePrimaryVertex(anEvent);
 	}//ip

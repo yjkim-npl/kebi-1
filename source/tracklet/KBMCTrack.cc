@@ -30,6 +30,7 @@ void KBMCTrack::Clear(Option_t *option)
   fDetectorID.clear(); fDetectorID.push_back(-999);
 
   fCreatorProcessID = 0;
+  fTime.clear(); fTime.push_back(-999);
 }
 
 void KBMCTrack::Print(Option_t *option) const
@@ -63,8 +64,9 @@ void KBMCTrack::SetVY(Double_t val)     { fVY[0] = val; }
 void KBMCTrack::SetVZ(Double_t val)     { fVZ[0] = val; }
 void KBMCTrack::SetDetectorID(Int_t id) { fDetectorID[0] = id; }
 void KBMCTrack::SetCreatorProcessID(Int_t id)  { fCreatorProcessID = id; }
+void KBMCTrack::SetTime(Double_t val)	{ fTime[0] = val; }
 
-void KBMCTrack::SetMCTrack(Int_t trackID, Int_t parentID, Int_t pdg, Double_t px, Double_t py, Double_t pz, Int_t detectorID, Double_t vx, Double_t vy, Double_t vz, Int_t processID)
+void KBMCTrack::SetMCTrack(Int_t trackID, Int_t parentID, Int_t pdg, Double_t px, Double_t py, Double_t pz, Int_t detectorID, Double_t vx, Double_t vy, Double_t vz, Int_t processID, Double_t time)
 {
   fTrackID = trackID;
   fParentID = parentID;
@@ -77,6 +79,7 @@ void KBMCTrack::SetMCTrack(Int_t trackID, Int_t parentID, Int_t pdg, Double_t px
   fVZ[0] = vz;
   fDetectorID[0] = detectorID;
   fCreatorProcessID = processID;
+  fTime[0] = time;
 }
 
 void KBMCTrack::AddVertex(Double_t px, Double_t py, Double_t pz, Int_t detectorID, Double_t vx, Double_t vy, Double_t vz)

@@ -39,8 +39,9 @@ class KBMCTrack : public KBTracklet
     void SetVZ(Double_t val);
     void SetDetectorID(Int_t id);
     void SetCreatorProcessID(Int_t id);
+	void SetTime(Double_t val);
 
-    void SetMCTrack(Int_t trackID, Int_t parentID, Int_t pdg, Double_t px, Double_t py, Double_t pz, Int_t detectorID = 0, Double_t vx = 0, Double_t vy = 0, Double_t vz = 0, Int_t processID = -1);
+    void SetMCTrack(Int_t trackID, Int_t parentID, Int_t pdg, Double_t px, Double_t py, Double_t pz, Int_t detectorID = 0, Double_t vx = 0, Double_t vy = 0, Double_t vz = 0, Int_t processID = -1, Double_t time=0.);
     void AddVertex(Double_t px, Double_t py, Double_t pz, Int_t detectorID, Double_t vx, Double_t vy, Double_t vz);
 
     Int_t GetNumVertices() const;
@@ -101,6 +102,7 @@ class KBMCTrack : public KBTracklet
     vector<KBMCStep *> fStepArray; //!
 
     Int_t fCreatorProcessID = 0;
+	vector<Double_t> fTime;
   
   ClassDef(KBMCTrack, 4)
 };

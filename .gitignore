@@ -44,3 +44,11 @@ figures/
 *.eps
 *.jpg
 *.jpeg
+
+#yjkim
+scp/
+
+LAMPS-HighEnergy/macros_tpc/
+scp/
+*.root
+

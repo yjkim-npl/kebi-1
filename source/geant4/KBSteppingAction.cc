@@ -41,6 +41,6 @@ void KBSteppingAction::UserSteppingAction(const G4Step* step)
   //G4ThreeVector stepPos = .5 * (step -> GetPreStepPoint() -> GetPosition() + step -> GetPostStepPoint() -> GetPosition());
 	G4ThreeVector stepPos = step -> GetPreStepPoint() -> GetPosition();
   G4int _preNo = step -> GetPreStepPoint() -> GetPhysicalVolume() -> GetCopyNo();
-  cout << _preNo << " " << edep << " " << stepPos.z() << endl;
+//  cout << _preNo << " " << edep << " " << stepPos.z() << endl;
   fRunManager -> AddMCStep(_preNo, stepPos.x(), stepPos.y(), stepPos.z(), time, edep);
 }

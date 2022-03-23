@@ -19,6 +19,7 @@
 #include "G4Tubs.hh"
 #include "G4UserLimits.hh"
 #include "G4VisAttributes.hh"
+#include "G4VSolid.hh"
 
 #include <iostream>
 #include <cmath>
@@ -110,7 +111,7 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 	//-------------------------------------------------------------------
 	G4Box* solid_T = new G4Box("solid_T",1.,1.,1.);
 	G4LogicalVolume* logic_T = new G4LogicalVolume(solid_T,fNist->FindOrBuildMaterial("G4_Galactic"),"logic_T");
-	G4VPhysicalVolume* physic_T = new G4PVPlacement(0,G4ThreeVector(1000,1000,0),logic_T,"physic_T",WorldLog,false,1,true);
+	G4VPhysicalVolume* physic_T = new G4PVPlacement(0,G4ThreeVector(worldDX-1.,worldDY-1.,0),logic_T,"physic_T",WorldLog,false,1,true);
 	fRun -> SetSensitiveDetector(physic_T);
 	//Acrylic Shield
 	//-------------------------------------------------------------------
@@ -173,7 +174,7 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 		// front block set (up, down)
 		new G4PVPlacement(Rot, G4ThreeVector(0,0,CollPosZ+CollDimZ/2.), logicColl,"Collimator_1", WorldLog, false, fPar->GetParInt("CollID"), true);
 		// back block set (left, right)
-		new G4PVPlacement(0, G4ThreeVector(0,0,CollPosZ+3*CollDimZ/2.), logicColl,"Collimator_1", WorldLog, false, fPar->GetParInt("CollID"), true);
+		new G4PVPlacement(0, G4ThreeVector(0,0,CollPosZ+3*CollDimZ/2.), logicColl,"Collimator_2", WorldLog, false, fPar->GetParInt("CollID"), true);
 
 	}
 
@@ -335,7 +336,9 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 		else if (fPar->GetParInt("targetMat") == 3) // graphite will be added soon
 		{
 //			targetMat = FindMaterial("Graphite");
-			targetMat = new G4Material("Graphite",12,12.011*g/mole,2.26*g/cm3,kStateSolid);
+//			targetMat = new G4Material("Graphite",12,12.011*g/mole,1.88*g/cm3,kStateSolid);
+			targetMat = new G4Material("Graphite",1.88*g/cm3,1,kStateSolid);
+			targetMat -> AddElement(elC,100*perCent);
 		}
 		else { cout <<"\nTarget material???\n"; assert(false); }
 

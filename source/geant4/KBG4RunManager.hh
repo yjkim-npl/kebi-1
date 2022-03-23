@@ -49,7 +49,7 @@ class KBG4RunManager : public G4RunManager, public KBGear
 
     void AddMCTrack(Int_t opt, Int_t trackID, Int_t parentID, Int_t pdg,
         Double_t px, Double_t py, Double_t pz,
-        Int_t dID, Double_t vx, Double_t vy, Double_t vz, Int_t pcID);
+        Int_t dID, Double_t vx, Double_t vy, Double_t vz, Int_t pcID, Double_t time);
 
     void AddTrackVertex(Double_t px, Double_t py, Double_t pz,
         Int_t dID, Double_t vx, Double_t vy, Double_t vz);
