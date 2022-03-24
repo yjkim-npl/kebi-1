@@ -107,16 +107,12 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 	fVisWorld->SetForceWireframe(true);
 	WorldLog->SetVisAttributes(fVisWorld);
 
-	
-	// trash - ? ckim
+	// trash
 	//-------------------------------------------------------------------
 	G4Box* solid_T = new G4Box("solid_T",1.,1.,1.);
 	G4LogicalVolume* logic_T = new G4LogicalVolume(solid_T,fNist->FindOrBuildMaterial("G4_Galactic"),"logic_T");
-	G4VPhysicalVolume* physic_T = new G4PVPlacement(
-			0, G4ThreeVector(worldDX-1.,worldDY-1.,0), logic_T, "physic_T", WorldLog, false, 1, true);
+	G4VPhysicalVolume* physic_T = new G4PVPlacement(0,G4ThreeVector(worldDX-1.,worldDY-1.,0),logic_T,"physic_T",WorldLog,false,1,true);
 	fRun -> SetSensitiveDetector(physic_T);
-	
-
 	//Acrylic Shield
 	//-------------------------------------------------------------------
 	if (fPar -> GetParBool("AcrylShieldIn"))
@@ -126,18 +122,17 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 		ArcShieldmat -> AddElement(elC,5);
 		ArcShieldmat -> AddElement(elH,8);
 		ArcShieldmat -> AddElement(elO,2);
-		G4int	 ArcShieldID 	= fPar->GetParInt("ArcShieldID");
-		G4double ArcShieldDimX	= fPar->GetParDouble("ArcShieldDimX");
-		G4double ArcShieldDimY	= fPar->GetParDouble("ArcShieldDimY");
-		G4double ArcShieldDimZ	= fPar->GetParDouble("ArcShieldDimZ");
+		G4int	 ArcShieldID 	 = fPar->GetParInt("ArcShieldID");
+		G4double ArcShieldDimX	 = fPar->GetParDouble("ArcShieldDimX");
+		G4double ArcShieldDimY	 = fPar->GetParDouble("ArcShieldDimY");
+		G4double ArcShieldDimZ	 = fPar->GetParDouble("ArcShieldDimZ");
 		G4double ArcShieldHoleR = fPar->GetParDouble("ArcShieldHoleR");
 		G4double ArcShieldOffZ1 = fPar->GetParDouble("ArcShieldOffZ1");
 		G4double ArcShieldOffZ2 = fPar->GetParDouble("ArcShieldOffZ2");
 
-		G4Box* baseShield = new G4Box("baseShield",ArcShieldDimX/2., ArcShieldDimY/2., ArcShieldDimZ/2.);
-		G4Tubs* subHole   = new G4Tubs("Hole", 0, 60.0/2, 1.03*ArcShieldDimZ/2., 0, 2*M_PI);
-		G4SubtractionSolid* solidArcShield = new G4SubtractionSolid(
-				"solidArcShield", baseShield, subHole, 0, G4ThreeVector(0,0,0));
+		G4Box* baseShield 	= new G4Box("baseShield",ArcShieldDimX/2., ArcShieldDimY/2., ArcShieldDimZ/2.);
+		G4Tubs* subHole 	= new G4Tubs("Hole", 0, 60.0/2, 1.03*ArcShieldDimZ/2., 0, 2*M_PI);
+		G4SubtractionSolid* solidArcShield = new G4SubtractionSolid("solidArcShield", baseShield, subHole, 0, G4ThreeVector(0,0,0));
 		G4LogicalVolume* logicArcShield = new G4LogicalVolume(solidArcShield, ArcShieldmat, "logicArcShield");
 		G4VisAttributes* attArcShield = new G4VisAttributes(G4Colour(G4Colour::Gray()));
 		logicArcShield -> SetVisAttributes(attArcShield);
@@ -158,47 +153,29 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 
 		G4int	 CollID	   = fPar->GetParInt("CollID");
 		G4double CollDimX  = fPar->GetParDouble("CollDimX");	// one brick [] 
-		G4double CollDimY  = fPar->GetParDouble("CollDimY");
-		G4double CollDimZ  = fPar->GetParDouble("CollDimZ");
-		G4double CollslitX = fPar->GetParDouble("CollslitX");
-		G4double CollslitY = fPar->GetParDouble("CollslitY");
-		G4double CollPosZ  = fPar->GetParDouble("CollPosZ");
+		G4double CollDimY  = fPar->GetParDouble("CollDimY"); 
+		G4double CollDimZ  = fPar->GetParDouble("CollDimZ"); 
+		G4double CollslitX = fPar->GetParDouble("CollslitX"); 
+		G4double CollslitY = fPar->GetParDouble("CollslitY"); 
+		G4double CollPosZ  = fPar->GetParDouble("CollPosZ"); 
 
-		//Volumes
-		G4Box* solidBoxColl = new G4Box("solidBoxColl", CollDimX/2., CollDimY/2., CollDimZ/2.);
-		//G4Box* solidSubColl = new G4Box("solidSubColl",CollslitX/2., CollDimY/2., 1.03*CollDimZ/2.);
-		//G4SubtractionSolid* solidColl = new G4SubtractionSolid(
-		//		"solidColl", solidBoxColl, solidSubColl, 0, G4ThreeVector(0,0,0));
-		//G4LogicalVolume* logicColl = new G4LogicalVolume(solidColl, Collmat, "logicCollimator");
-		G4Box* solidSubCollX = new G4Box("solidSubCollX", CollslitX/2., CollDimY/2. - 0.1, CollDimZ/2.);
-		G4Box* solidSubCollY = new G4Box("solidSubCollY", CollDimX/2. - 0.1, CollslitY/2., CollDimZ/2.);
-		G4SubtractionSolid* solidCollX = new G4SubtractionSolid("solidCollX", solidBoxColl, solidSubCollX, 0, fZero);
-		G4SubtractionSolid* solidCollY = new G4SubtractionSolid("solidCollY", solidBoxColl, solidSubCollY, 0, fZero);
-		G4LogicalVolume* logicCollX = new G4LogicalVolume(solidCollX, Collmat, "logicCollimatorX");
-		G4LogicalVolume* logicCollY = new G4LogicalVolume(solidCollY, Collmat, "logicCollimatorY");
+		G4Box* solidBoxColl = new G4Box("solidBoxColl",CollDimX/2.,CollDimY/2.,CollDimZ/2.);
+		G4Box* solidSubColl = new G4Box("solidSubColl",CollslitX/2.,CollDimY/2.,1.03*CollDimZ/2.);
+		G4SubtractionSolid* solidColl = new G4SubtractionSolid("solidColl",solidBoxColl,solidSubColl,0,G4ThreeVector(0,0,0));
+		G4LogicalVolume* logicColl = new G4LogicalVolume(solidColl, Collmat, "logicCollimator");
 
 		//vis attributes
 		G4VisAttributes* attColl = new G4VisAttributes(G4Colour(G4Colour::Gray()));
-		attColl->SetVisibility(true);
-		attColl->SetForceWireframe(true);
-		logicCollX->SetVisAttributes(attColl);
-		logicCollY->SetVisAttributes(attColl);
-
-		//Rotation
+		attColl -> SetVisibility(true);
+		attColl -> SetForceWireframe(true);
+		logicColl -> SetVisAttributes(attColl);
 		G4RotationMatrix* Rot = new G4RotationMatrix;
-		Rot->rotateZ(90*deg);
-
-		//Position
-		G4ThreeVector posCollX(0, 0, CollPosZ + CollDimZ/2.);
-		G4ThreeVector posCollY(0, 0, CollPosZ + CollDimZ/2. + CollDimZ);
-		new G4PVPlacement(0, posCollX, logicCollX, "CollimatorX", WorldLog, false, CollID, true);
-		new G4PVPlacement(0, posCollY, logicCollY, "CollimatorY", WorldLog, false, CollID, true);
-		/*
+		Rot -> rotateZ(90*deg);
 		// front block set (up, down)
 		new G4PVPlacement(Rot, G4ThreeVector(0,0,CollPosZ+CollDimZ/2.), logicColl,"Collimator_1", WorldLog, false, fPar->GetParInt("CollID"), true);
 		// back block set (left, right)
 		new G4PVPlacement(0, G4ThreeVector(0,0,CollPosZ+3*CollDimZ/2.), logicColl,"Collimator_2", WorldLog, false, fPar->GetParInt("CollID"), true);
-		*/
+
 	}
 
 	//Boron Shield
