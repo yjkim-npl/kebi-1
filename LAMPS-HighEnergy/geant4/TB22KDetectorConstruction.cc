@@ -10,6 +10,7 @@
 #include "G4FieldManager.hh"
 #include "G4LogicalVolume.hh"
 #include "G4NistManager.hh"
+#include "G4Orb.hh"
 #include "G4PVPlacement.hh"
 #include "G4RunManager.hh"
 #include "G4SubtractionSolid.hh"
@@ -97,8 +98,15 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 	G4double worldDX = fPar->GetParDouble("worlddX");
 	G4double worldDY = fPar->GetParDouble("worlddY");
 	G4double worldDZ = fPar->GetParDouble("worlddZ");
+	G4double worldDR = fPar->GetParDouble("worlddR");
 
-	G4Box*             WorldSol = new G4Box("WorldSolid", worldDX, worldDY, worldDZ);
+	G4VSolid* WorldSol;
+	if		(fPar -> GetParInt("worldShape") == 0 )
+		WorldSol = new G4Box("WorldSolid", worldDX, worldDY, worldDZ);
+	else if	(fPar -> GetParInt("worldShape") == 1)
+		WorldSol = new G4Orb("WorldSolid", worldDR);
+	else WorldSol = new G4Box("WorldSolid", worldDX, worldDY, worldDZ);
+
 	G4LogicalVolume*   WorldLog = new G4LogicalVolume(WorldSol, worldMat, "World");
 	G4VPhysicalVolume* WorldPhy = new G4PVPlacement(0, fZero, WorldLog, "WorldPhys", 0, false, worldID, true);
 
@@ -115,6 +123,9 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 	G4VPhysicalVolume* physic_T = new G4PVPlacement(
 			0, G4ThreeVector(worldDX-1.,worldDY-1.,0), logic_T, "physic_T", WorldLog, false, 1, true);
 	fRun -> SetSensitiveDetector(physic_T);
+	auto fVistrash = new G4VisAttributes();
+	fVistrash -> SetVisibility(false);
+	logic_T -> SetVisAttributes(fVistrash);
 	
 
 	//Acrylic Shield
@@ -131,19 +142,27 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 		G4double ArcShieldDimY	= fPar->GetParDouble("ArcShieldDimY");
 		G4double ArcShieldDimZ	= fPar->GetParDouble("ArcShieldDimZ");
 		G4double ArcShieldHoleR = fPar->GetParDouble("ArcShieldHoleR");
+		G4double ArcShieldHoleX = fPar->GetParDouble("ArcShieldHoleX");
+		G4double ArcShieldHoleY = fPar->GetParDouble("ArcShieldHoleY");
 		G4double ArcShieldOffZ1 = fPar->GetParDouble("ArcShieldOffZ1");
 		G4double ArcShieldOffZ2 = fPar->GetParDouble("ArcShieldOffZ2");
 
 		G4Box* baseShield = new G4Box("baseShield",ArcShieldDimX/2., ArcShieldDimY/2., ArcShieldDimZ/2.);
-		G4Tubs* subHole   = new G4Tubs("Hole", 0, 60.0/2, 1.03*ArcShieldDimZ/2., 0, 2*M_PI);
-		G4SubtractionSolid* solidArcShield = new G4SubtractionSolid(
-				"solidArcShield", baseShield, subHole, 0, G4ThreeVector(0,0,0));
-		G4LogicalVolume* logicArcShield = new G4LogicalVolume(solidArcShield, ArcShieldmat, "logicArcShield");
+		G4Box* subBox	  = new G4Box("subBox", ArcShieldHoleX/2., ArcShieldHoleY/2., 1.03*ArcShieldDimZ/2.);
+		G4Tubs* subHole   = new G4Tubs("Hole", 0, ArcShieldHoleR, 1.03*ArcShieldDimZ/2., 0, 2*M_PI);
+		G4SubtractionSolid* solidArcShield1 = new G4SubtractionSolid(
+				"solidArcShield1", baseShield, subBox, 0, G4ThreeVector(0,0,0));
+		G4SubtractionSolid* solidArcShield2 = new G4SubtractionSolid(
+				"solidArcShield2", baseShield, subHole, 0, G4ThreeVector(0,0,0));
+		G4LogicalVolume* logicArcShield1 = new G4LogicalVolume(solidArcShield1, ArcShieldmat, "logicArcShield1");
+		G4LogicalVolume* logicArcShield2 = new G4LogicalVolume(solidArcShield2, ArcShieldmat, "logicArcShield2");
 		G4VisAttributes* attArcShield = new G4VisAttributes(G4Colour(G4Colour::Gray()));
-		logicArcShield -> SetVisAttributes(attArcShield);
+		attArcShield -> SetForceWireframe(true);
+		logicArcShield1 -> SetVisAttributes(attArcShield);
+		logicArcShield2 -> SetVisAttributes(attArcShield);
 
-		new G4PVPlacement(0, G4ThreeVector(0,0,ArcShieldOffZ1+ArcShieldDimZ/2.), logicArcShield, "ArcShield1", WorldLog, false, 0, true);
-		new G4PVPlacement(0, G4ThreeVector(0,0,ArcShieldOffZ2+ArcShieldDimZ/2.), logicArcShield, "ArcShield2", WorldLog, false, 0, true);
+		new G4PVPlacement(0, G4ThreeVector(0,0,ArcShieldOffZ1+ArcShieldDimZ/2.), logicArcShield1, "ArcShield1", WorldLog, false, 0, true);
+		new G4PVPlacement(0, G4ThreeVector(0,0,ArcShieldOffZ2+ArcShieldDimZ/2.), logicArcShield2, "ArcShield2", WorldLog, false, 0, true);
 	}
 
 	//Acrylic Collimator
@@ -191,8 +210,8 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 		//Position
 		G4ThreeVector posCollX(0, 0, CollPosZ + CollDimZ/2.);
 		G4ThreeVector posCollY(0, 0, CollPosZ + CollDimZ/2. + CollDimZ);
-		new G4PVPlacement(0, posCollX, logicCollX, "CollimatorX", WorldLog, false, CollID, true);
-		new G4PVPlacement(0, posCollY, logicCollY, "CollimatorY", WorldLog, false, CollID, true);
+		new G4PVPlacement(0, posCollX, logicCollY, "CollimatorX", WorldLog, false, CollID, true);
+		new G4PVPlacement(0, posCollY, logicCollX, "CollimatorY", WorldLog, false, CollID, true);
 		/*
 		// front block set (up, down)
 		new G4PVPlacement(Rot, G4ThreeVector(0,0,CollPosZ+CollDimZ/2.), logicColl,"Collimator_1", WorldLog, false, fPar->GetParInt("CollID"), true);
@@ -374,12 +393,14 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 
 		G4Box*           TargetSol = new G4Box("TargetSolid", targetDimX/2, targetDimY/2, targetDimZ/2);
 		G4LogicalVolume* TargetLog = new G4LogicalVolume(TargetSol, targetMat, "TargetLogic");
-		new G4PVPlacement(0, targetPos, TargetLog, "Target", WorldLog, false, targetID, true);
+		G4VPhysicalVolume* TargetPhy = new G4PVPlacement(0, targetPos, TargetLog, "Target", WorldLog, false, targetID, true);
 
 		auto fVisTarget = new G4VisAttributes();
 		fVisTarget->SetColor(G4Color::White());
 		fVisTarget->SetForceWireframe(true);
 		TargetLog->SetVisAttributes(fVisTarget);
+
+		fRun -> SetSensitiveDetector(TargetPhy);
 	}//Target
 
 	//SC tilted
@@ -409,8 +430,8 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 		const double SCTOfsX1 = sin(comTheta1 * deg) * (sctPosZ1 + sctDimZ/2.);
 		const double SCTOfsZ1 = cos(comTheta1 * deg) * (sctPosZ1 + sctDimZ/2.);
 		G4Transform3D SCTTr1 = G4Transform3D(rotTheta1, G4ThreeVector(SCTOfsX1, 0, SCTOfsZ1));
-		G4VPhysicalVolume* SCTPhys1 = new G4PVPlacement(SCTTr1, SCTLog, "SCT1", WorldLog, false, sctID+1, true);
-		fRun->SetSensitiveDetector(SCTPhys1);
+//		G4VPhysicalVolume* SCTPhys1 = new G4PVPlacement(SCTTr1, SCTLog, "SCT1", WorldLog, false, sctID+1, true);
+//		fRun->SetSensitiveDetector(SCTPhys1);
 
 		auto fVisSCT = new G4VisAttributes();
 		fVisSCT->SetColor(G4Color::Cyan());
@@ -439,8 +460,8 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 			const double SCAOfsX1 = sin(comTheta1 * deg) * (scaPosZ1 + scaDimZ/2.);
 			const double SCAOfsZ1 = cos(comTheta1 * deg) * (scaPosZ1 + scaDimZ/2.);
 			G4Transform3D SCATr1 = G4Transform3D(rotTheta1, G4ThreeVector(SCAOfsX1, 0, SCAOfsZ1));
-			G4VPhysicalVolume* SCAPhys1 = new G4PVPlacement(SCATr1,SCALog,"SCA1", WorldLog, false, sctID+11, true);
-			fRun->SetSensitiveDetector(SCAPhys1);
+//			G4VPhysicalVolume* SCAPhys1 = new G4PVPlacement(SCATr1,SCALog,"SCA1", WorldLog, false, sctID+11, true);
+//			fRun->SetSensitiveDetector(SCAPhys1);
 		}
 
 	}//SC tilt
@@ -476,8 +497,8 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 			const double ATPOfsX1 = sin(comTheta1 * deg) * (attpcPosZ1 + attpcDimZ/2.);
 			const double ATPOfsZ1 = cos(comTheta1 * deg) * (attpcPosZ1 + attpcDimZ/2.);
 			G4Transform3D ATPTr1 = G4Transform3D(rotTheta1, G4ThreeVector(ATPOfsX1, 0, ATPOfsZ1));
-			G4VPhysicalVolume* ATPPhys1 = new G4PVPlacement(ATPTr1,ATPLog,"ATTPC1",WorldLog,false,attpcID+1,true);
-			fRun->SetSensitiveDetector(ATPPhys1);
+//			G4VPhysicalVolume* ATPPhys1 = new G4PVPlacement(ATPTr1,ATPLog,"ATTPC1",WorldLog,false,attpcID+1,true);
+//			fRun->SetSensitiveDetector(ATPPhys1);
 
 			const double dZ1 = (double)(attpcPosZ1+attpcDimZ/2);
 			const double dTheta1 = std::atan2(dZ1, dX);
@@ -563,6 +584,72 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 			}//a, b
 		}//FTOF
 	}//B/FTOF
+	
+	//--------------------------------------------------------------------
+	if (fPar -> GetParBool("Si-CsIIn"))
+	{
+		G4Material* matSi = fNist -> FindOrBuildMaterial("G4_Si");
+		G4Material* matCsI = fNist -> FindOrBuildMaterial("G4_CESIUM_IODIDE");
+
+		G4int SiID = fPar -> GetParInt("SiID");
+		G4int CsIID = fPar -> GetParInt("CsIID");
+		G4double dX = fPar -> GetParDouble("Si-CsIdX");
+		G4double dY = fPar -> GetParDouble("Si-CsIdY");
+		G4double SidZ = fPar -> GetParDouble("SidZ");
+		G4double CsIdZ = fPar -> GetParDouble("CsIdZ");
+//		G4double posOffZSi = fPar -> GetParDouble("posOffZSi");			// offset = target(0,0,0)
+//		G4double posOffZCsI = fPar -> GetParDouble("posOffZCsI");
+		G4double posRSi = fPar -> GetParDouble("posRSi");
+//		G4double posRCsI = fPar -> GetParDouble("posRCsI");
+
+		G4Box*           solidSi  = new G4Box("solidSi", dX/2, dY/2, SidZ/2);
+		G4Box*           solidCsI = new G4Box("solidCsI", dX/2, dY/2, CsIdZ/2);
+		G4LogicalVolume* logicSi  = new G4LogicalVolume(solidSi, matSi, "logicSi");
+		G4LogicalVolume* logicCsI = new G4LogicalVolume(solidCsI, matCsI, "logicCsI");
+
+		const double posX0 = sin(comTheta0 * deg) * (posRSi + SidZ/2.);
+		const double posZ0 = cos(comTheta0 * deg) * (posRSi + SidZ/2.);
+		const double posX1 = posX0 + sin(comTheta0 * deg) * (SidZ + CsIdZ/2.);
+		const double posZ1 = posZ0 + cos(comTheta0 * deg) * (SidZ + CsIdZ/2.);
+		G4Transform3D SiTr = G4Transform3D(rotTheta0, G4ThreeVector(posX0, 0, posZ0));
+		G4Transform3D CsITr = G4Transform3D(rotTheta0, G4ThreeVector(posX1, 0, posZ1));
+		G4VPhysicalVolume* SiPhys = new G4PVPlacement(SiTr, logicSi, "physicSi", WorldLog, false, SiID+0, true);
+		G4VPhysicalVolume* CsIPhys = new G4PVPlacement(CsITr, logicCsI, "physicCsI", WorldLog, false, SiID+1, true);
+		fRun->SetSensitiveDetector(SiPhys);
+		fRun->SetSensitiveDetector(CsIPhys);
+
+		auto fVisSi = new G4VisAttributes();
+		fVisSi->SetColor(G4Color::Cyan());
+		fVisSi->SetForceWireframe(true);
+		logicSi->SetVisAttributes(fVisSi);
+		logicCsI->SetVisAttributes(fVisSi);
+
+//		if (fPar->GetParInt("comSetup") == 0) 
+//		{
+//			//Naming scheme: SC (beamline) -> SCT (tilted) -> SCA (tiled + AT-TPC altermnative)
+//			G4double scaDimX = 60.;
+//			G4double scaDimY = 60.;
+//			G4double scaDimZ =  3.;
+//			G4double scaPosZ0 = sctPosZ1 +  50.;
+//			G4double scaPosZ1 = sctPosZ1 + 100.;
+//
+//			G4Box*           SCASol = new G4Box("SCAltSolid", scaDimX/2, scaDimY/2, scaDimZ/2);
+//			G4LogicalVolume* SCALog = new G4LogicalVolume(SCASol, scMat, "SCAltLogic");
+//			SCALog->SetVisAttributes(fVisSCT);
+//
+//			const double SCAOfsX0 = sin(comTheta1 * deg) * (scaPosZ0 + scaDimZ/2.);
+//			const double SCAOfsZ0 = cos(comTheta1 * deg) * (scaPosZ0 + scaDimZ/2.);
+//			G4Transform3D SCATr0 = G4Transform3D(rotTheta1, G4ThreeVector(SCAOfsX0, 0, SCAOfsZ0));
+//			G4VPhysicalVolume* SCAPhys0 = new G4PVPlacement(SCATr0,SCALog,"SCA0", WorldLog, false, sctID+10, true);
+//			fRun->SetSensitiveDetector(SCAPhys0);
+//
+//			const double SCAOfsX1 = sin(comTheta1 * deg) * (scaPosZ1 + scaDimZ/2.);
+//			const double SCAOfsZ1 = cos(comTheta1 * deg) * (scaPosZ1 + scaDimZ/2.);
+//			G4Transform3D SCATr1 = G4Transform3D(rotTheta1, G4ThreeVector(SCAOfsX1, 0, SCAOfsZ1));
+////			G4VPhysicalVolume* SCAPhys1 = new G4PVPlacement(SCATr1,SCALog,"SCA1", WorldLog, false, sctID+11, true);
+////			fRun->SetSensitiveDetector(SCAPhys1);
+//		}
+	}
 
 	//ND
 	//--------------------------------------------------------------------

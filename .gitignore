@@ -46,8 +46,9 @@ figures/
 *.jpeg
 
 #yjkim
-scp/
+scp/*
 
-LAMPS-HighEnergy/macros_tpc/scp/
-*.root
+#
+LAMPS-HighEnergy/macros_tpc/scp/*.root
+LAMPS-HighEnergy/macros_tpc/codes/*
 

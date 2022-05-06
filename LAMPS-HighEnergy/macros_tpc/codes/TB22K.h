@@ -58,7 +58,7 @@ bool Exist(set<int> List, int id)
 int DettoIndex(const int detID)
 {
 	enum SDorder {EMP, SC1a, SC1b, SC2a, SC2b, ATTPCa, ATTPCb, FTOF, TG};
-	int index;
+	int index= -1;;
 	if		(detID == 1100) index = SC1a;
 	else if	(detID == 1101) index = SC1b;
 	else if	(detID == 1400) index = SC2a;
