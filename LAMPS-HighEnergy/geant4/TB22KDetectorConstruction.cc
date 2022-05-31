@@ -64,6 +64,7 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 	G4double comTheta1 = fPar->GetParDouble("comTheta1");
 	G4RotationMatrix rotTheta0 = G4RotationMatrix(); rotTheta0.rotateY(comTheta0 * deg);
 	G4RotationMatrix rotTheta1 = G4RotationMatrix(); rotTheta1.rotateY(comTheta1 * deg);
+	G4RotationMatrix rot0 = G4RotationMatrix();
 
 	//Argon (gas)
 	G4double ArGasD = 1.7836 * mg/cm3 * fSTPTemp/fLabTemp;
@@ -479,15 +480,17 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 		G4Box*           SCTSol = new G4Box("SCTiltSolid", sctDimX/2, sctDimY/2, sctDimZ/2);
 		G4LogicalVolume* SCTLog = new G4LogicalVolume(SCTSol, scMat, "SCTiltLogic");
 
-		const double SCTOfsX0 = sin(comTheta0 * deg) * (sctPosZ0 + sctDimZ/2.);
+		const double SCTOfsY0 = sin(comTheta0 * deg) * (sctPosZ0 + sctDimZ/2.);
 		const double SCTOfsZ0 = cos(comTheta0 * deg) * (sctPosZ0 + sctDimZ/2.);
-		G4Transform3D SCTTr0 = G4Transform3D(rotTheta0, G4ThreeVector(SCTOfsX0, 0, SCTOfsZ0));
+//		G4Transform3D SCTTr0 = G4Transform3D(rotTheta0, G4ThreeVector(0, SCTOfsY0, SCTOfsZ0));
+		G4Transform3D SCTTr0 = G4Transform3D(rot0, G4ThreeVector(0, SCTOfsY0, SCTOfsZ0));
 		G4VPhysicalVolume* SCTPhys0 = new G4PVPlacement(SCTTr0, SCTLog, "SCT0", WorldLog, false, sctID+0, true);
 		fRun->SetSensitiveDetector(SCTPhys0);
 
-		const double SCTOfsX1 = sin(comTheta1 * deg) * (sctPosZ1 + sctDimZ/2.);
+		const double SCTOfsY1 = sin(comTheta1 * deg) * (sctPosZ1 + sctDimZ/2.);
 		const double SCTOfsZ1 = cos(comTheta1 * deg) * (sctPosZ1 + sctDimZ/2.);
-		G4Transform3D SCTTr1 = G4Transform3D(rotTheta1, G4ThreeVector(SCTOfsX1, 0, SCTOfsZ1));
+//		G4Transform3D SCTTr1 = G4Transform3D(rotTheta1, G4ThreeVector(SCTOfsX1, 0, SCTOfsZ1));
+		G4Transform3D SCTTr1 = G4Transform3D(rot0, G4ThreeVector(0, SCTOfsY1, SCTOfsZ1));
 		G4VPhysicalVolume* SCTPhys1 = new G4PVPlacement(SCTTr1, SCTLog, "SCT1", WorldLog, false, sctID+1, true);
 		fRun->SetSensitiveDetector(SCTPhys1);
 
