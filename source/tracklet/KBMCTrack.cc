@@ -82,7 +82,7 @@ void KBMCTrack::SetMCTrack(Int_t trackID, Int_t parentID, Int_t pdg, Double_t px
   fTime[0] = time;
 }
 
-void KBMCTrack::AddVertex(Double_t px, Double_t py, Double_t pz, Int_t detectorID, Double_t vx, Double_t vy, Double_t vz)
+void KBMCTrack::AddVertex(Double_t px, Double_t py, Double_t pz, Int_t detectorID, Double_t vx, Double_t vy, Double_t vz, Double_t t)
 {
   fPX.push_back(px);
   fPY.push_back(py);
@@ -91,6 +91,7 @@ void KBMCTrack::AddVertex(Double_t px, Double_t py, Double_t pz, Int_t detectorI
   fVY.push_back(vy);
   fVZ.push_back(vz);
   fDetectorID.push_back(detectorID);
+  fTime.push_back(t);
 }
 
 Int_t KBMCTrack::GetNumVertices() const { return (Int_t) fPX.size(); }
@@ -103,6 +104,7 @@ TVector3 KBMCTrack::GetMomentum(Int_t idx) const { return TVector3(fPX[idx], fPY
 Double_t KBMCTrack::GetVX(Int_t idx) const { return fVX[idx]; }
 Double_t KBMCTrack::GetVY(Int_t idx) const { return fVY[idx]; }
 Double_t KBMCTrack::GetVZ(Int_t idx) const { return fVZ[idx]; }
+Double_t KBMCTrack::GetTime(Int_t idx) const { return fTime[idx]; }
 TVector3 KBMCTrack::GetVertex(Int_t idx) const { return TVector3(fVX[idx], fVY[idx], fVZ[idx]); }
 
 Int_t KBMCTrack::GetDetectorID(Int_t idx) const { return fDetectorID[idx]; }

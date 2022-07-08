@@ -103,6 +103,11 @@ void KBPrimaryGeneratorAction::GeneratePrimariesMode0(G4Event* anEvent)
 		if (fabs(vzUser) <= par->GetParDouble("worlddZ")) vz = vzUser;
 		else cout <<"WARNING: beam insertion point located out of the world! Set default (-worlddZ\n";
 	}
+	if (par->CheckPar("G4InputPosY") == true)
+	{
+		G4double vyUser = par->GetParDouble("G4InputPosY");
+		vy = vyUser;
+	}
 
 	//Beam shape, ckim
 	for (G4int ip=0; ip<NperEvent; ip++)
@@ -127,12 +132,12 @@ void KBPrimaryGeneratorAction::GeneratePrimariesMode0(G4Event* anEvent)
 
 			std::uniform_real_distribution<> RDdistX(-beamdx, beamdx); //ckim
 			std::uniform_real_distribution<> RDdistY(-beamdy, beamdy);
-			vx = RDdistX(RDGen); //(G4UniformRand()-0.5) * beamdx;
-			vy = RDdistY(RDGen); //(G4UniformRand()-0.5) * beamdy;
+			vx  = RDdistX(RDGen); //(G4UniformRand()-0.5) * beamdx;
+			vy += RDdistY(RDGen); //(G4UniformRand()-0.5) * beamdy;
 		}
 		if(par -> GetParBool("G4InputTimeDist"))
 		{
-			std::uniform_real_distribution<> RDdistT(0,1);
+			std::uniform_real_distribution<> RDdistT(0,par->GetParDouble("TimeWindow"));
 			const double vt = RDdistT(RDGen);
 			fParticleGun -> SetParticleTime(vt * ms);
 		}

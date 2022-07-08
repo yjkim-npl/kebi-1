@@ -200,12 +200,12 @@ G4VPhysicalVolume* TB22KDetectorConstruction::Construct()
 		G4double block3Offy = fPar -> GetParDouble("Block3Offy");
 		G4double block3Offz = fPar -> GetParDouble("Block3Offz");
 
-		G4ThreeVector pos1_1(block1Offx,block1Offy+block1y/2,block1Offz+block1z/2); 
-		G4ThreeVector pos1_2(block1Offx-2*block1x/2,block1Offy+block1y/2,block1Offz+block1z/2); 
-		G4ThreeVector pos1_3(block1Offx+2*block1x/2,block1Offy+block1y/2,block1Offz+block1z/2); 
-		G4ThreeVector pos1_4(block2Offx-2*block2x/2.,block1Offy+3*block1y/2,block1Offz+block1z/2); 
-		G4ThreeVector pos2(block2Offx,block2Offy+block2y/2,block2Offz + block2z/2); 
-		G4ThreeVector pos3(block3Offx,block3Offy+block3y/2,block3Offz + block3z/2); 
+		G4ThreeVector pos1_1(block1Offx,block1Offy+block1y/2,block1Offz+block1z/2+trans); 
+		G4ThreeVector pos1_2(block1Offx-2*block1x/2,block1Offy+block1y/2,block1Offz+block1z/2+trans); 
+		G4ThreeVector pos1_3(block1Offx+2*block1x/2,block1Offy+block1y/2,block1Offz+block1z/2+trans); 
+		G4ThreeVector pos1_4(block2Offx-2*block2x/2.,block1Offy+3*block1y/2,block1Offz+block1z/2+trans); 
+		G4ThreeVector pos2(block2Offx,block2Offy+block2y/2,block2Offz + block2z/2+trans); 
+		G4ThreeVector pos3(block3Offx,block3Offy+block3y/2,block3Offz + block3z/2+trans); 
 
 		G4Box* solid_block1 = new G4Box("solidBlock1",block1x/2,block1y/2,block1z/2);
 		G4Box* solid_block2 = new G4Box("solidBlock2",block2x/2,block2y/2,block2z/2);

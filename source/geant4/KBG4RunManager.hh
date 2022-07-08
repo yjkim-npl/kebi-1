@@ -52,7 +52,7 @@ class KBG4RunManager : public G4RunManager, public KBGear
         Int_t dID, Double_t vx, Double_t vy, Double_t vz, Int_t pcID, Double_t time);
 
     void AddTrackVertex(Double_t px, Double_t py, Double_t pz,
-        Int_t dID, Double_t vx, Double_t vy, Double_t vz);
+        Int_t dID, Double_t vx, Double_t vy, Double_t vz, Double_t t);
 
     void AddMCStep(Int_t dID, Double_t x, Double_t y, Double_t z, Double_t t, Double_t e);
 
