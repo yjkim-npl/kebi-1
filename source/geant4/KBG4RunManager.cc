@@ -75,7 +75,7 @@ void KBG4RunManager::Initialize()
   fProcessTable -> SetPar("Primary", idx++);
 	G4cout << idx-1 << " " << "Primary" << G4endl;
   for (auto name : *procNames){
-	  if( idx)
+	  if(idx)
 		fProcessTable -> SetPar(name, idx++);
 		G4cout << idx-1 << " " << name << G4endl;
 	}

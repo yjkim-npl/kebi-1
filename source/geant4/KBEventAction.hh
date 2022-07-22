@@ -13,6 +13,7 @@ class KBEventAction : public G4UserEventAction
     KBEventAction(KBG4RunManager *man);
     virtual ~KBEventAction() {}
 
+//    virtual void Begin:OfEventAction(const G4Event* event);
     virtual void EndOfEventAction(const G4Event* event);
 
   private:
